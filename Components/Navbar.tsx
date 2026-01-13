@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import theme from '@/theme';
+import { Menu } from 'lucide-react';
 
 const Navbar = () => {
     const pathname = usePathname();
@@ -62,8 +62,8 @@ const Navbar = () => {
             ref={navRef}
             className="fixed top-0 w-full z-50 backdrop-blur-xl"
             style={{
-                background: `linear-gradient(to right, ${theme.colors.background.DEFAULT}ee, ${theme.colors.background.surface}dd)`,
-                borderBottom: `1px solid ${theme.colors.border.DEFAULT}`,
+                background: 'linear-gradient(to right, var(--background)ee, var(--background-surface)dd)',
+                borderBottom: '1px solid var(--border)',
             }}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,7 +85,7 @@ const Navbar = () => {
                                 {/* Glow effect on hover */}
                                 <div
                                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md -z-10"
-                                    style={{ backgroundColor: theme.colors.primary.DEFAULT }}
+                                    style={{ backgroundColor: 'var(--primary)' }}
                                 />
                             </div>
                         </Link>
@@ -102,8 +102,8 @@ const Navbar = () => {
                                 ref={indicatorRef}
                                 className="absolute bottom-0 h-0.5 rounded-full transition-all"
                                 style={{
-                                    backgroundColor: theme.colors.primary.DEFAULT,
-                                    boxShadow: theme.shadows.glow,
+                                    backgroundColor: 'var(--primary)',
+                                    boxShadow: 'var(--shadow-glow)',
                                 }}
                             />
 
@@ -116,13 +116,13 @@ const Navbar = () => {
                                         data-active={isActive}
                                         className="relative px-5 py-2.5 text-base font-medium transition-all duration-300 rounded-lg group"
                                         style={{
-                                            color: isActive ? theme.colors.primary.DEFAULT : theme.colors.text.secondary,
+                                            color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
                                         }}
                                     >
                                         {/* Hover background */}
                                         <span
                                             className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                            style={{ backgroundColor: `${theme.colors.primary.DEFAULT}10` }}
+                                            style={{ backgroundColor: 'color-mix(in srgb, var(--primary) 10%, transparent)' }}
                                         />
 
                                         {/* Text with hover effect */}
@@ -134,7 +134,7 @@ const Navbar = () => {
                                         {isActive && (
                                             <span
                                                 className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full animate-pulse"
-                                                style={{ backgroundColor: theme.colors.primary.DEFAULT }}
+                                                style={{ backgroundColor: 'var(--primary)' }}
                                             />
                                         )}
                                     </Link>
@@ -147,11 +147,9 @@ const Navbar = () => {
                     <div className="md:hidden">
                         <button
                             className="p-2 rounded-lg transition-colors"
-                            style={{ color: theme.colors.text.secondary }}
+                            style={{ color: 'var(--text-secondary)' }}
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
+                            <Menu className="w-6 h-6" />
                         </button>
                     </div>
                 </div>

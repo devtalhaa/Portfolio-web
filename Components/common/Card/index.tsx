@@ -1,5 +1,4 @@
 import React from 'react';
-import theme from '@/theme';
 
 interface CardProps {
     children: React.ReactNode;
@@ -19,12 +18,13 @@ export const Card: React.FC<CardProps> = ({
     style,
 }) => {
     const baseStyles: React.CSSProperties = {
-        backgroundColor: theme.colors.background.surface,
-        border: `1px solid ${theme.colors.border.DEFAULT}`,
-        borderRadius: theme.radius.xl,
-        transition: theme.transition.normal,
+        backgroundColor: 'var(--background-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-xl)',
+        transition: 'var(--transition-normal)',
         cursor: onClick ? 'pointer' : 'default',
-        boxShadow: glow ? theme.shadows.card : 'none',
+        boxShadow: glow ? 'var(--shadow-card)' : 'none',
+        overflow: 'visible',
         ...style,
     };
 
@@ -45,7 +45,7 @@ export const Card: React.FC<CardProps> = ({
 
 // Specialized skill card with 3D effects
 interface SkillCardProps {
-    icon: string;
+    icon: React.ReactNode;
     name: string;
     level: number;
     className?: string;
@@ -61,25 +61,25 @@ export const SkillCard: React.FC<SkillCardProps> = ({
         <div
             className={`skill-item relative bg-gradient-to-br rounded-2xl p-6 cursor-pointer ${className}`}
             style={{
-                background: `linear-gradient(to bottom right, ${theme.colors.background.surface}, ${theme.colors.background.DEFAULT})`,
-                border: `1px solid ${theme.colors.border.DEFAULT}`,
+                background: 'linear-gradient(to bottom right, var(--background-surface), var(--background))',
+                border: '1px solid var(--border)',
                 transformStyle: 'preserve-3d',
-                boxShadow: theme.shadows.card,
+                boxShadow: 'var(--shadow-card)',
             }}
         >
             {/* Glow effect */}
             <div
                 className="absolute inset-0 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-300"
                 style={{
-                    background: `linear-gradient(to right, transparent, ${theme.colors.primary.DEFAULT}10, transparent)`,
+                    background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--primary), transparent 90%), transparent)',
                 }}
             />
 
             <div className="relative z-10">
-                <div className="text-4xl mb-3 text-center">{icon}</div>
+                <div className="text-4xl mb-3 text-center flex justify-center">{icon}</div>
                 <h3
                     className="font-semibold text-center mb-3"
-                    style={{ color: theme.colors.text.primary }}
+                    style={{ color: 'var(--text-primary)' }}
                 >
                     {name}
                 </h3>
@@ -87,19 +87,19 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                 {/* Skill level bar */}
                 <div
                     className="w-full rounded-full h-2 overflow-hidden"
-                    style={{ backgroundColor: theme.colors.background.elevated }}
+                    style={{ backgroundColor: 'var(--background-elevated)' }}
                 >
                     <div
                         className="h-full rounded-full transition-all duration-1000"
                         style={{
                             width: `${level}%`,
-                            background: `linear-gradient(to right, ${theme.colors.primary.DEFAULT}, ${theme.colors.secondary.DEFAULT})`,
+                            background: 'linear-gradient(to right, var(--primary), var(--secondary))',
                         }}
                     />
                 </div>
                 <p
                     className="text-xs text-center mt-2 font-medium"
-                    style={{ color: theme.colors.primary.DEFAULT }}
+                    style={{ color: 'var(--primary)' }}
                 >
                     {level}%
                 </p>
@@ -110,7 +110,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
 
 // Service card
 interface ServiceCardProps {
-    icon: string;
+    icon: React.ReactNode;
     title: string;
     description: string;
     features: string[];
@@ -128,21 +128,21 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         <div
             className={`service-card group rounded-3xl p-8 cursor-pointer transition-all duration-300 hover:scale-105 ${className}`}
             style={{
-                backgroundColor: theme.colors.background.surface,
-                border: `1px solid ${theme.colors.border.DEFAULT}`,
+                backgroundColor: 'var(--background-surface)',
+                border: '1px solid var(--border)',
                 boxShadow: 'inset 0 1px 0 0 rgba(148, 163, 184, 0.1)',
             }}
         >
-            <div className="text-5xl mb-6">{icon}</div>
+            <div className="text-5xl mb-6 flex justify-center">{icon}</div>
             <h3
                 className="text-2xl font-bold mb-4 group-hover:text-cyan-400 transition-colors"
-                style={{ color: theme.colors.text.primary }}
+                style={{ color: 'var(--text-primary)' }}
             >
                 {title}
             </h3>
             <p
                 className="mb-6 leading-relaxed"
-                style={{ color: theme.colors.text.muted }}
+                style={{ color: 'var(--text-muted)' }}
             >
                 {description}
             </p>
@@ -151,11 +151,11 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                     <div
                         key={idx}
                         className="flex items-center gap-2"
-                        style={{ color: theme.colors.text.placeholder }}
+                        style={{ color: 'var(--text-placeholder)' }}
                     >
                         <span
                             className="w-1.5 h-1.5 rounded-full"
-                            style={{ backgroundColor: theme.colors.primary.DEFAULT }}
+                            style={{ backgroundColor: 'var(--primary)' }}
                         />
                         <span className="text-sm">{feature}</span>
                     </div>
