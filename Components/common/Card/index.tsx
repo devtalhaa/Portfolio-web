@@ -126,7 +126,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 }) => {
     return (
         <div
-            className={`service-card group rounded-3xl p-8 cursor-pointer transition-all duration-300 hover:scale-105 ${className}`}
+            className={`service-card group rounded-3xl p-8 cursor-pointer transition-all duration-300 overflow-hidden ${className}`}
             style={{
                 backgroundColor: 'var(--background-surface)',
                 border: '1px solid var(--border)',

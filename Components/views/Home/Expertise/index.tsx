@@ -21,119 +21,124 @@ const skills = [
 ];
 
 const Expertise = () => {
-    const skillsRef = useRef<HTMLDivElement>(null);
+    const sectionRef = useRef<HTMLElement>(null);
+    const scrollerRef = useRef<HTMLDivElement>(null);
 
+    // Scroll-triggered entrance animation
     useGSAP(() => {
-        gsap.from('.skill-item', {
+        const tl = gsap.timeline({
             scrollTrigger: {
-                trigger: skillsRef.current,
+                trigger: sectionRef.current,
                 start: 'top 80%',
+                end: 'top 20%',
                 toggleActions: 'play none none reverse',
-            },
-            y: 100,
+            }
+        });
+
+        tl.from('.expertise-title', {
+            y: 50,
             opacity: 0,
-            rotationX: -90,
-            transformOrigin: 'bottom',
             duration: 0.8,
-            stagger: {
-                each: 0.15,
-                from: 'start',
-            },
-            ease: 'back.out(1.2)',
-        });
-    }, { scope: skillsRef });
+            ease: 'power3.out',
+        })
+            .from('.expertise-subtitle', {
+                y: 30,
+                opacity: 0,
+                duration: 0.6,
+                ease: 'power2.out',
+            }, '-=0.4')
+            .from('.skills-scroller', {
+                opacity: 0,
+                scale: 0.9,
+                duration: 0.8,
+                ease: 'back.out(1.2)',
+            }, '-=0.3');
+    }, { scope: sectionRef });
 
+    // Infinite horizontal scroll animation
     useEffect(() => {
-        // Magnetic hover effect for skill cards
-        const skillCards = document.querySelectorAll('.skill-item');
-        const handlers: Array<{
-            card: Element;
-            enter: () => void;
-            leave: () => void;
-            move: (e: MouseEvent) => void;
-        }> = [];
+        if (!scrollerRef.current) return;
 
-        skillCards.forEach((card) => {
-            const htmlCard = card as HTMLElement;
+        const scroller = scrollerRef.current;
+        const scrollerInner = scroller.querySelector('.scroller-inner') as HTMLElement;
 
-            const enter = () => {
-                gsap.to(card, {
-                    scale: 1.1,
-                    rotationY: 5,
-                    rotationX: 5,
-                    duration: 0.4,
-                    ease: 'power2.out',
-                });
-            };
+        if (!scrollerInner) return;
 
-            const leave = () => {
-                gsap.to(card, {
-                    scale: 1,
-                    rotationY: 0,
-                    rotationX: 0,
-                    duration: 0.4,
-                    ease: 'power2.out',
-                });
-            };
-
-            const move = (e: MouseEvent) => {
-                const rect = htmlCard.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -10;
-                const rotateY = ((x - centerX) / centerX) * 10;
-
-                gsap.to(card, {
-                    rotationX: rotateX,
-                    rotationY: rotateY,
-                    duration: 0.3,
-                    ease: 'power2.out',
-                });
-            };
-
-            htmlCard.addEventListener('mouseenter', enter);
-            htmlCard.addEventListener('mouseleave', leave);
-            htmlCard.addEventListener('mousemove', move);
-
-            handlers.push({ card, enter, leave, move });
+        // Clone the skills for seamless infinite scroll
+        const scrollerContent = Array.from(scrollerInner.children);
+        scrollerContent.forEach((item) => {
+            const duplicatedItem = item.cloneNode(true) as HTMLElement;
+            scrollerInner.appendChild(duplicatedItem);
         });
+
+        // Calculate animation duration based on content width
+        const scrollWidth = scrollerInner.scrollWidth / 2;
+        const duration = scrollWidth / 50; // Adjust speed here (pixels per second)
+
+        // Create infinite scroll animation
+        const animation = gsap.to(scrollerInner, {
+            x: -scrollWidth,
+            duration: duration,
+            ease: 'none',
+            repeat: -1,
+        });
+
+        // Pause on hover
+        scroller.addEventListener('mouseenter', () => animation.pause());
+        scroller.addEventListener('mouseleave', () => animation.play());
 
         return () => {
-            handlers.forEach(({ card, enter, leave, move }) => {
-                const htmlCard = card as HTMLElement;
-                htmlCard.removeEventListener('mouseenter', enter);
-                htmlCard.removeEventListener('mouseleave', leave);
-                htmlCard.removeEventListener('mousemove', move);
-            });
+            animation.kill();
         };
     }, []);
 
     return (
-        <section ref={skillsRef} className="py-32 px-4 md:px-8 max-w-6xl mx-auto" style={{ perspective: '1000px' }}>
-            <h2
-                className="text-4xl md:text-5xl font-bold mb-4 text-center"
-                style={{ color: 'var(--text-primary)' }}
-            >
-                My <span style={{ color: 'var(--primary)' }}>Expertise</span>
-            </h2>
-            <p
-                className="text-center mb-16 text-lg"
-                style={{ color: 'var(--text-muted)' }}
-            >
-                Hover to interact
-            </p>
+        <section
+            ref={sectionRef}
+            className="py-32 px-4 md:px-8 overflow-hidden"
+        >
+            <div className="max-w-6xl mx-auto">
+                <h2
+                    className="expertise-title text-4xl md:text-5xl font-bold mb-4 text-center"
+                    style={{ color: 'var(--text-primary)' }}
+                >
+                    My <span style={{ color: 'var(--primary)' }}>Expertise</span>
+                </h2>
+                <p
+                    className="expertise-subtitle text-center mb-16 text-lg"
+                    style={{ color: 'var(--text-muted)' }}
+                >
+                    Hover to pause scrolling
+                </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {skills.map((skill, index) => (
-                    <SkillCard
-                        key={index}
-                        icon={skill.icon}
-                        name={skill.name}
-                        level={skill.level}
-                    />
-                ))}
+                {/* Infinite scrolling container */}
+                <div
+                    ref={scrollerRef}
+                    className="skills-scroller relative"
+                    style={{
+                        maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                        WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                    }}
+                >
+                    <div className="scroller-inner flex gap-6">
+                        {skills.map((skill, index) => (
+                            <div
+                                key={index}
+                                className="flex-shrink-0"
+                                style={{
+                                    width: '280px',
+                                    perspective: '1000px'
+                                }}
+                            >
+                                <SkillCard
+                                    icon={skill.icon}
+                                    name={skill.name}
+                                    level={skill.level}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </section>
     );
