@@ -116,7 +116,7 @@ const ContactUsPage = () => {
                                         className="hover:opacity-80 transition-colors"
                                         style={{ color: 'var(--text-primary)' }}
                                     >
-                                        dev.talhaa@gmail.com
+                                        haq@gmail.com
                                     </a>
                                 </div>
                             </div>

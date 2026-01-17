@@ -126,7 +126,7 @@ const ServicesPage = () => {
                         className="services-header font-semibold text-lg tracking-wider uppercase mb-4 block"
                         style={{ color: 'var(--primary)' }}
                     >
-                        What I Offer
+                        What We Offer
                     </span>
                     <h1
                         className="services-header text-5xl md:text-7xl font-black mb-6"

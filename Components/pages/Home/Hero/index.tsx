@@ -52,7 +52,7 @@ const Hero = () => {
                     className="hero-title text-6xl md:text-8xl font-black mb-4"
                     style={{ color: 'var(--primary)' }}
                 >
-                    Samsung
+                    HAQ
                 </h1>
                 <p
                     className="hero-subtitle text-xl md:text-3xl mb-8 font-light"

@@ -1,3 +1,3 @@
-import ContactUsPage from '@/Components/views/Contact-Us';
+import ContactUsPage from '@/Components/pages/Contact-Us';
 
 export default ContactUsPage;

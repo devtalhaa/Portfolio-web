@@ -126,17 +126,17 @@ const Navbar = () => {
                                         />
 
                                         {/* Text with hover effect */}
-                                        <span className="relative z-10 group-hover:text-cyan-400 transition-colors duration-300">
+                                        <span className="relative group-hover:text-cyan-400 transition-colors duration-300">
                                             {link.label}
                                         </span>
 
                                         {/* Active dot indicator */}
-                                        {isActive && (
+                                        {/* {isActive && (
                                             <span
                                                 className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full animate-pulse"
                                                 style={{ backgroundColor: 'var(--primary)' }}
                                             />
-                                        )}
+                                        )} */}
                                     </Link>
                                 );
                             })}

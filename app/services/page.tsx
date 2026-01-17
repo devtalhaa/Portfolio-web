@@ -1,3 +1,3 @@
-import ServicesPage from '@/Components/views/Services';
+import ServicesPage from '@/Components/pages/Services';
 
 export default ServicesPage;

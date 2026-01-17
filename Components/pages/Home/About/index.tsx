@@ -32,7 +32,7 @@ const About = () => {
                     className="text-4xl md:text-5xl font-bold mb-8"
                     style={{ color: 'var(--text-primary)' }}
                 >
-                    About <span style={{ color: 'var(--primary)' }}>Me</span>
+                    About <span style={{ color: 'var(--primary)' }}>Us</span>
                 </h2>
                 <Card className="md:p-12">
                     <p
