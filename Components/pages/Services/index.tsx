@@ -11,6 +11,20 @@ const ServicesPage = () => {
     const isServicesPage = pathname === '/services';
     const sectionRef = useRef<HTMLElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [time, setTime] = useState(0);
+
+    useEffect(() => {
+        let animationFrameId: number;
+        const startTime = Date.now();
+        const animate = () => {
+            // Calculate time elapsed in seconds since mount
+            const elapsed = (Date.now() - startTime) / 1000;
+            setTime(elapsed);
+            animationFrameId = requestAnimationFrame(animate);
+        };
+        animate();
+        return () => cancelAnimationFrame(animationFrameId);
+    }, []);
 
     const services = [
         {
@@ -100,7 +114,8 @@ const ServicesPage = () => {
         const zIndex = 100 - Math.round(absPos * 10);
 
         // Floating animation for active card only
-        const time = Date.now() / 1000;
+        // Time comes from state to avoid hydration mismatch
+
         const isActive = absPos < 0.5;
         const floatY = isActive ? Math.sin(time * 0.5) * 4 : 0;
         const floatRotate = isActive ? Math.sin(time * 0.3) * 1.5 : 0;
