@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/Components/Navbar";
+import ThreeBackgroundWrapper from "@/Components/three/ThreeBackgroundWrapper";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,6 +23,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.className} bg-slate-950 text-slate-300 min-h-screen`}>
+        {/* Three.js 3D Background */}
+        <ThreeBackgroundWrapper />
         <Navbar />
         <main className="pt-16">
           {children}

@@ -1,18 +1,16 @@
 "use client";
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { usePathname } from 'next/navigation';
 import { Rocket, BarChart3, Zap, Server } from 'lucide-react';
 import { ServiceCard, Button } from '@/Components/common';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const ServicesPage = () => {
+    const pathname = usePathname();
+    const isServicesPage = pathname === '/services';
     const sectionRef = useRef<HTMLElement>(null);
-    const scrollerRef = useRef<HTMLDivElement>(null);
+    const [activeIndex, setActiveIndex] = useState(0);
 
     const services = [
         {
@@ -41,150 +39,293 @@ const ServicesPage = () => {
         },
     ];
 
-    // Scroll-triggered entrance animation
-    useGSAP(() => {
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: sectionRef.current,
-                start: 'top 80%',
-                end: 'top 20%',
-                toggleActions: 'play none none reverse',
-            }
-        });
+    const cardCount = services.length;
 
-        tl.from('.services-header', {
-            y: 50,
-            opacity: 0,
-            duration: 0.8,
-            ease: 'power3.out',
-        })
-            .from('.services-subtitle', {
-                y: 30,
-                opacity: 0,
-                duration: 0.6,
-                ease: 'power2.out',
-            }, '-=0.4')
-            .from('.services-scroller', {
-                opacity: 0,
-                scale: 0.9,
-                duration: 0.8,
-                ease: 'back.out(1.2)',
-            }, '-=0.3');
-    }, { scope: sectionRef });
-
-    // Infinite horizontal scroll animation
+    // Track scroll and calculate which card should be active
     useEffect(() => {
-        if (!scrollerRef.current) return;
+        const handleScroll = () => {
+            if (!sectionRef.current) return;
 
-        const scroller = scrollerRef.current;
-        const scrollerInner = scroller.querySelector('.scroller-inner') as HTMLElement;
+            const rect = sectionRef.current.getBoundingClientRect();
+            const sectionTop = rect.top; // Negative as we scroll down
+            const windowHeight = window.innerHeight;
 
-        if (!scrollerInner) return;
+            // Total scrollable distance for the card sequence
+            // We want 1 card = 1 viewport height of scroll roughly
+            // Increase this to "slow down" the scroll
+            const scrollPerCard = windowHeight * 0.8;
 
-        // Clone the services for seamless infinite scroll
-        const scrollerContent = Array.from(scrollerInner.children);
-        scrollerContent.forEach((item) => {
-            const duplicatedItem = item.cloneNode(true) as HTMLElement;
-            scrollerInner.appendChild(duplicatedItem);
-        });
+            // Calculate progress
+            const rawIndex = Math.abs(sectionTop) / scrollPerCard;
 
-        // Calculate animation duration based on content width
-        const scrollWidth = scrollerInner.scrollWidth / 2;
-        const duration = scrollWidth / 50; // Adjust speed here (pixels per second)
+            const clampedIndex = Math.max(0, Math.min(cardCount - 1, rawIndex));
 
-        // Create infinite scroll animation (no pause on hover)
-        gsap.to(scrollerInner, {
-            x: -scrollWidth,
-            duration: duration,
-            ease: 'none',
-            repeat: -1,
-        });
-
-        return () => {
-            gsap.killTweensOf(scrollerInner);
+            setActiveIndex(clampedIndex);
         };
-    }, []);
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
+
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [cardCount]);
+
+    // Calculate card position and rotation in the fan carousel
+    const getCardStyle = (index: number) => {
+        // Position relative to active card (-2, -1, 0, 1, 2...)
+        const relativePosition = index - activeIndex;
+        const absPos = Math.abs(relativePosition);
+
+        // Card spread settings - TIGHTER layout
+        const spreadX = 120; // Reduced horizontal spread
+        const spreadY = 20;  // Reduced vertical offset
+        const maxRotation = 18; // Rotation angle
+        const scaleReduction = 0.06; // Scale reduction per position
+
+        // Calculate horizontal position (cards stack closer)
+        const translateX = relativePosition * spreadX;
+
+        // Calculate vertical position (slight curve down)
+        const translateY = absPos * spreadY;
+
+        // Calculate rotation (left cards rotate counterclockwise, right clockwise)
+        const rotation = relativePosition * maxRotation;
+
+        // Calculate scale (center = 1, edges smaller - makes side cards 50% visible feel)
+        const scale = Math.max(0.7, 1 - absPos * scaleReduction);
+
+        // Calculate opacity (side cards more faded)
+        const opacity = Math.max(0.4, 1 - absPos * 0.3);
+
+        // Z-index: cards CLOSER to center are ON TOP (higher z-index)
+        const zIndex = 100 - Math.round(absPos * 10);
+
+        // Floating animation for active card only
+        const time = Date.now() / 1000;
+        const isActive = absPos < 0.5;
+        const floatY = isActive ? Math.sin(time * 0.5) * 4 : 0;
+        const floatRotate = isActive ? Math.sin(time * 0.3) * 1.5 : 0;
+
+        return {
+            transform: `
+                translateX(${translateX}px)
+                translateY(${translateY + floatY}px)
+                rotate(${rotation + floatRotate}deg)
+                scale(${scale})
+            `,
+            opacity,
+            zIndex,
+            transition: 'transform 0.12s ease-out, opacity 0.2s ease-out',
+            pointerEvents: (absPos < 0.5 ? 'auto' : 'none') as 'auto' | 'none',
+        };
+    };
 
     return (
-        <section ref={sectionRef} className="min-h-screen pt-24 pb-20 px-4 md:px-8 overflow-hidden">
-            {/* Background elements */}
-            <div className="fixed inset-0 -z-10">
-                <div
-                    className="absolute top-0 right-0 w-96 h-96 opacity-10 rounded-full blur-3xl"
-                    style={{ backgroundColor: 'var(--primary)' }}
-                />
-                <div
-                    className="absolute bottom-0 left-0 w-96 h-96 opacity-10 rounded-full blur-3xl"
-                    style={{ backgroundColor: 'var(--secondary)' }}
-                />
-            </div>
+        <section
+            ref={sectionRef}
+            className="relative"
+            style={{
+                // Height = viewport (sticky) + scroll distance for cards
+                // Increased scale for slower scroll and spaced out footer
+                height: `${(cardCount * 120) + 100}vh`
+            }}
+        >
+            {/* 
+              STICKY CONTAINER
+              Occupies 100vh and sticks to top. 
+              Holds Header + Cards.
+              Flex justify-center ensures cards are VERTICALLY CENTERED when locked.
+              NO overflow-hidden, so cards can float outside bounds if needed.
+            */}
+            <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center">
 
-            <div className="max-w-6xl mx-auto">
-                {/* Header */}
-                <div className="text-center mb-20">
-                    <span
-                        className="services-header font-semibold text-lg tracking-wider uppercase mb-4 block"
-                        style={{ color: 'var(--primary)' }}
-                    >
-                        What We Offer
-                    </span>
-                    <h1
-                        className="services-header text-5xl md:text-7xl font-black mb-6"
-                        style={{ color: 'var(--text-primary)' }}
-                    >
-                        My <span style={{ color: 'var(--primary)' }}>Services</span>
-                    </h1>
-                    <p
-                        className="services-subtitle text-xl max-w-2xl mx-auto"
-                        style={{ color: 'var(--text-muted)' }}
-                    >
-                        Transforming your ideas into exceptional digital experiences with cutting-edge technologies and creative solutions.
-                    </p>
+                {/* Gradient overlays (Inside sticky so they stay put) */}
+                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+                    <div
+                        className="absolute top-0 right-0 w-[700px] h-[700px] opacity-10 rounded-full blur-[120px]"
+                        style={{
+                            backgroundColor: 'var(--primary)',
+                            transform: `translate(${activeIndex * 30}px, ${activeIndex * -20}px)`,
+                            transition: 'transform 0.5s ease-out'
+                        }}
+                    />
+                    <div
+                        className="absolute bottom-0 left-0 w-[500px] h-[500px] opacity-8 rounded-full blur-[100px]"
+                        style={{
+                            backgroundColor: 'var(--secondary)',
+                            transform: `translate(${activeIndex * -20}px, ${activeIndex * 15}px)`,
+                            transition: 'transform 0.5s ease-out'
+                        }}
+                    />
                 </div>
 
-                {/* Infinite scrolling container */}
-                <div
-                    ref={scrollerRef}
-                    className="services-scroller relative mb-20"
-                    style={{
-                        maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-                        WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-                    }}
-                >
-                    <div className="scroller-inner flex gap-8">
-                        {services.map((service, index) => (
-                            <div
-                                key={index}
-                                className="flex-shrink-0"
+                <div className="max-w-7xl mx-auto relative w-full px-4" style={{ zIndex: 10 }}>
+                    {/* Header - Absolute top to stay out of the way of centered cards */}
+                    {/* Fades out as you scroll to focus on cards */}
+                    <div className="absolute top-[-35vh] left-0 right-0 text-center transition-opacity duration-500"
+                        style={{ opacity: activeIndex > 0.3 ? 0 : 1, pointerEvents: activeIndex > 0.3 ? 'none' : 'auto' }}
+                    >
+                        <span
+                            className="font-semibold text-lg tracking-wider uppercase mb-4 block"
+                            style={{
+                                color: 'var(--primary)',
+                                textShadow: '0 0 40px rgba(34, 211, 238, 0.6)'
+                            }}
+                        >
+                            What We Offer
+                        </span>
+                        <h1
+                            className="text-5xl md:text-7xl font-black mb-4"
+                            style={{ color: 'var(--text-primary)' }}
+                        >
+                            My <span
                                 style={{
-                                    width: '380px',
+                                    color: 'var(--primary)',
+                                    textShadow: '0 0 50px rgba(34, 211, 238, 0.5)'
+                                }}
+                            >Services</span>
+                        </h1>
+                        <p
+                            className="text-lg max-w-2xl mx-auto"
+                            style={{ color: 'var(--text-muted)' }}
+                        >
+                            Transforming ideas into exceptional digital experiences
+                        </p>
+                    </div>
+
+                    {/* Scroll instruction */}
+                    {isServicesPage && (
+                        <div
+                            className="absolute bottom-[-35vh] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+                            style={{
+                                opacity: activeIndex < 0.5 ? 1 : 0,
+                                zIndex: 100,
+                                transition: 'opacity 0.3s ease',
+                                pointerEvents: activeIndex > 0.5 ? 'none' : 'auto'
+                            }}
+                        >
+                            <span
+                                className="text-sm font-medium px-4 py-2 rounded-full"
+                                style={{
+                                    color: 'var(--primary)',
+                                    backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                                    border: '1px solid rgba(34, 211, 238, 0.3)'
                                 }}
                             >
-                                <ServiceCard
-                                    icon={service.icon}
-                                    title={service.title}
-                                    description={service.description}
-                                    features={service.features}
-                                />
+                                Scroll to explore services
+                            </span>
+                            <div className="animate-bounce">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--primary)' }}>
+                                    <path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
                             </div>
-                        ))}
+                        </div>
+                    )}
+
+                    {/* Card progress indicator */}
+                    {isServicesPage && (
+                        <div
+                            className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-3 hidden md:flex"
+                            style={{ zIndex: 100 }}
+                        >
+                            {services.map((_, index) => (
+                                <div
+                                    key={index}
+                                    className="w-2 h-2 rounded-full transition-all duration-300"
+                                    style={{
+                                        backgroundColor: Math.round(activeIndex) === index
+                                            ? 'var(--primary)'
+                                            : 'var(--border)',
+                                        boxShadow: Math.round(activeIndex) === index
+                                            ? '0 0 10px rgba(34, 211, 238, 0.6)'
+                                            : 'none',
+                                        transform: Math.round(activeIndex) === index
+                                            ? 'scale(1.5)'
+                                            : 'scale(1)',
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Fan Carousel Cards Container */}
+                    <div
+                        className="flex items-center justify-center overflow-visible"
+                        style={{
+                            height: '500px',
+                            perspective: '2000px',
+                        }}
+                    >
+                        <div
+                            className="relative w-full flex items-end justify-center"
+                            style={{
+                                transformStyle: 'preserve-3d',
+                                height: '500px',
+                            }}
+                        >
+                            {services.map((service, index) => {
+                                const cardStyle = getCardStyle(index);
+
+                                return (
+                                    <div
+                                        key={index}
+                                        className="absolute w-[320px] md:w-[360px] origin-bottom"
+                                        style={{
+                                            ...cardStyle,
+                                            transformStyle: 'preserve-3d',
+                                            bottom: '50px',
+                                        }}
+                                    >
+                                        {/* Card glow */}
+                                        <div
+                                            className="absolute inset-0 rounded-2xl opacity-40 blur-xl -z-10"
+                                            style={{
+                                                background: `linear-gradient(135deg, var(--primary), var(--secondary))`,
+                                                transform: 'scale(1.05) translateY(10px)',
+                                            }}
+                                        />
+
+                                        {/* Card container with theme styling */}
+                                        <div
+                                            className="rounded-2xl overflow-hidden"
+                                            style={{
+                                                backgroundColor: 'var(--background-card)',
+                                                border: '1px solid var(--border)',
+                                                boxShadow: `
+                                                    0 25px 60px -15px rgba(0, 0, 0, 0.6),
+                                                    0 0 30px rgba(34, 211, 238, 0.08)
+                                                `,
+                                            }}
+                                        >
+                                            <ServiceCard
+                                                icon={service.icon}
+                                                title={service.title}
+                                                description={service.description}
+                                                features={service.features}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                {/* CTA */}
-                <div className="text-center">
-                    <p
-                        className="text-lg mb-6"
-                        style={{ color: 'var(--text-muted)' }}
-                    >
-                        Interested in working together?
-                    </p>
-                    <Link href="/contact-us">
-                        <Button variant="primary" size="lg">
-                            Let's Talk
-                        </Button>
-                    </Link>
-                </div>
+            {/* CTA at bottom - reveals when sticky container unsticks */}
+            <div
+                className="absolute bottom-0 w-full text-center py-20 pb-40"
+            >
+                <h2
+                    className="text-3xl font-bold mb-6"
+                    style={{ color: 'var(--text-primary)' }}
+                >
+                    Ready to build something amazing?
+                </h2>
+                <Link href="/contact-us">
+                    <Button variant="primary" size="lg">
+                        Let's Talk
+                    </Button>
+                </Link>
             </div>
         </section>
     );
