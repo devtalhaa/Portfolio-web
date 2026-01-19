@@ -164,7 +164,7 @@ const ContactUsPage = () => {
                     </div>
 
                     {/* Contact Form */}
-                    <Card className="md:p-10 pb-12">
+                    <Card className="p-8 md:p-12 md:pb-24">
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="form-field">
                                 <Input

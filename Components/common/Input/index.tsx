@@ -44,7 +44,7 @@ export const Input: React.FC<InputProps> = ({
                     ...inputBaseStyles,
                     borderColor: error ? 'var(--error)' : 'var(--border)',
                 }}
-                className={`placeholder: text - slate - 500 ${className} `}
+                className={`placeholder:text-slate-500 ${className} `}
                 onFocus={(e) => {
                     e.target.style.borderColor = 'var(--primary)';
                     props.onFocus?.(e);
