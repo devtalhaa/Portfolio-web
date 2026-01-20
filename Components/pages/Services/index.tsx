@@ -151,7 +151,7 @@ const ServicesPage = () => {
               Flex justify-center ensures cards are VERTICALLY CENTERED when locked.
               NO overflow-hidden, so cards can float outside bounds if needed.
             */}
-            <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center">
+            <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden">
 
                 {/* Gradient overlays (Inside sticky so they stay put) */}
                 <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
