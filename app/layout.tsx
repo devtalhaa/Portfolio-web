@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/Components/Navbar";
 import ThreeBackgroundWrapper from "@/Components/three/ThreeBackgroundWrapper";
+import CustomCursor from "@/Components/common/CustomCursor";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,7 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} bg-slate-950 text-slate-300 min-h-screen`}>
+      <body className={`${poppins.className} bg-slate-950 text-slate-300 min-h-screen overflow-x-hidden`}>
+        {/* Custom Cursor Trail */}
+        <CustomCursor />
         {/* Three.js 3D Background */}
         <ThreeBackgroundWrapper />
         <Navbar />
